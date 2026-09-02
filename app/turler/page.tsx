@@ -1,25 +1,27 @@
 import type { Metadata } from "next"
 import { PageHeader } from "@/components/page-header"
-import { genres } from "@/lib/genres"
+import { client } from "@/sanity/lib/client"
+import { pageQuery } from "@/sanity/lib/queries"
+import type { PageDoc } from "@/sanity/lib/types"
 
-export const metadata: Metadata = {
-  title: "Türler | Gogol’un Paltosu",
-  description: "Hiciv, psikolojik roman, varoluşçu edebiyat ve daha fazlası.",
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await client.fetch<PageDoc | null>(pageQuery, { slug: "turler" })
+  if (!data) return {}
+  return { title: data.seoTitle, description: data.seoDescription }
 }
 
-export default function TurlerPage() {
+export default async function TurlerPage() {
+  const data = await client.fetch<PageDoc>(pageQuery, { slug: "turler" })
+  const genres = data.genres || []
+
   return (
     <>
-      <PageHeader
-        eyebrow="Edebi Türler"
-        title="Türler"
-        description="Her tür, insanı anlamanın farklı bir yolu. Gogol’un ustalıkla harmanladığı hicivden psikolojik derinliğe, edebiyatın zengin damarlarını keşfedin."
-      />
+      <PageHeader eyebrow={data.eyebrow || ""} title={data.title} description={data.description || ""} />
       <section className="paper-texture frame-border rounded-lg bg-parchment p-6 text-parchment-foreground md:p-10">
         <ul className="grid gap-6 sm:grid-cols-2">
           {genres.map((genre) => (
             <li
-              key={genre.title}
+              key={genre._id}
               className="flex flex-col rounded-md bg-popover/50 p-5 ring-1 ring-parchment-foreground/20"
             >
               <h2 className="font-display text-xl font-semibold text-parchment-foreground">{genre.title}</h2>
@@ -27,10 +29,12 @@ export default function TurlerPage() {
               <p className="mt-3 flex-1 text-[15px] leading-relaxed text-parchment-foreground/85">
                 {genre.description}
               </p>
-              <p className="mt-4 text-xs uppercase tracking-wide text-primary">
-                Örnekler:{" "}
-                <span className="italic normal-case text-parchment-foreground/70">{genre.examples}</span>
-              </p>
+              {genre.examples ? (
+                <p className="mt-4 text-xs uppercase tracking-wide text-primary">
+                  Örnekler:{" "}
+                  <span className="italic normal-case text-parchment-foreground/70">{genre.examples}</span>
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>

@@ -2,34 +2,33 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { BookCard, cardGridClass } from "@/components/book-card"
 import { PageHeader } from "@/components/page-header"
-import { getBook } from "@/lib/books"
+import { client } from "@/sanity/lib/client"
+import { pageQuery } from "@/sanity/lib/queries"
+import type { PageDoc } from "@/sanity/lib/types"
 
-export const metadata: Metadata = {
-  title: "Önerilerimiz | Gogol’un Paltosu",
-  description: "Palto ile aynı ruhu taşıyan, özenle seçilmiş okuma önerileri.",
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await client.fetch<PageDoc | null>(pageQuery, { slug: "onerilerimiz" })
+  if (!data) return {}
+  return { title: data.seoTitle, description: data.seoDescription }
 }
 
-const weeklySlug = "paltosu"
-const similarSlugs = ["dostoyevski", "kafka", "puskin"]
-
-export default function OnerilerimizPage() {
-  const weekly = getBook(weeklySlug)
-  const similar = similarSlugs.map(getBook).filter((b): b is NonNullable<typeof b> => Boolean(b))
+export default async function OnerilerimizPage() {
+  const data = await client.fetch<PageDoc>(pageQuery, { slug: "onerilerimiz" })
+  const weekly = data.featuredBook
+  const similarSection = data.sections?.[0]
 
   return (
     <>
-      <PageHeader
-        eyebrow="Editörün Seçkisi"
-        title="Önerilerimiz"
-        description="Palto’yu sevdiyseniz, aynı grotesk mizahı, toplumsal eleştiriyi ve derin insan gözlemini taşıyan bu eserler tam size göre."
-      />
+      <PageHeader eyebrow={data.eyebrow || ""} title={data.title} description={data.description || ""} />
 
       {weekly ? (
         <section className="paper-texture frame-border rounded-lg bg-parchment p-6 text-parchment-foreground md:p-10">
           <p className="font-display text-sm uppercase tracking-[0.3em] text-primary">Haftanın Önerisi</p>
           <div className="mt-4 flex flex-col gap-6 md:flex-row md:items-center">
             <div className="flex-1">
-              <h2 className="font-display text-2xl font-bold text-parchment-foreground md:text-3xl">{weekly.title}</h2>
+              <h2 className="font-display text-2xl font-bold text-parchment-foreground md:text-3xl">
+                {weekly.title}
+              </h2>
               <p className="text-sm italic text-parchment-foreground/70">
                 {weekly.author} · {weekly.year}
               </p>
@@ -47,15 +46,23 @@ export default function OnerilerimizPage() {
         </section>
       ) : null}
 
-      <section className="paper-texture frame-border rounded-lg bg-parchment p-6 text-parchment-foreground md:p-10">
-        <h2 className="font-display text-xl font-bold uppercase tracking-wide md:text-2xl">Benzer Ruhtaki Eserler</h2>
-        <div className="mt-2 h-0.5 w-16 rounded-full bg-primary" aria-hidden="true" />
-        <ul className={`mt-6 ${cardGridClass}`}>
-          {similar.map((book) => (
-            <BookCard key={book.slug} book={book} />
-          ))}
-        </ul>
-      </section>
+      {similarSection ? (
+        <section className="paper-texture frame-border rounded-lg bg-parchment p-6 text-parchment-foreground md:p-10">
+          {similarSection.title ? (
+            <>
+              <h2 className="font-display text-xl font-bold uppercase tracking-wide md:text-2xl">
+                {similarSection.title}
+              </h2>
+              <div className="mt-2 h-0.5 w-16 rounded-full bg-primary" aria-hidden="true" />
+            </>
+          ) : null}
+          <ul className={`mt-6 ${cardGridClass}`}>
+            {similarSection.books.map((book) => (
+              <BookCard key={book._id} book={book} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </>
   )
 }

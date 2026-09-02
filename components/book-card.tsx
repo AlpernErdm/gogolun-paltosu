@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
-import type { Book } from "@/lib/books"
+import type { BookSummary } from "@/sanity/lib/types"
+import { urlFor } from "@/sanity/lib/image"
 
 /**
  * Kart izgarasi: sabit sutunlar yerine esnek satir kullaniyoruz; boylece
@@ -10,13 +11,18 @@ import type { Book } from "@/lib/books"
 export const cardGridClass = "flex flex-wrap justify-center gap-6"
 export const cardWidthClass = "w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
 
-export function BookCard({ book }: { book: Book }) {
+export function BookCard({ book }: { book: BookSummary }) {
   return (
     <li
       className={`${cardWidthClass} flex flex-col overflow-hidden rounded-md bg-popover/50 ring-1 ring-parchment-foreground/20 transition-transform hover:-translate-y-1`}
     >
       <div className="relative flex aspect-[3/2] items-center justify-center overflow-hidden bg-secondary">
-        <Image src={book.cover} alt={book.coverAlt} fill className="object-contain" />
+        <Image
+          src={urlFor(book.cover).width(600).height(400).fit("max").url()}
+          alt={book.cover.alt || `${book.author} - ${book.title} kitap kapağı`}
+          fill
+          className="object-contain"
+        />
       </div>
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-primary">

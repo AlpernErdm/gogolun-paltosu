@@ -1,29 +1,27 @@
 import type { Metadata } from "next"
 import { BookCard, cardGridClass } from "@/components/book-card"
 import { PageHeader } from "@/components/page-header"
-import { getBook } from "@/lib/books"
+import { client } from "@/sanity/lib/client"
+import { pageQuery } from "@/sanity/lib/queries"
+import type { PageDoc } from "@/sanity/lib/types"
 
-export const metadata: Metadata = {
-  title: "Klasikler | Gogol’un Paltosu",
-  description: "Rus ve dünya edebiyatının ölümsüz klasiklerini keşfedin.",
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await client.fetch<PageDoc | null>(pageQuery, { slug: "klasikler" })
+  if (!data) return {}
+  return { title: data.seoTitle, description: data.seoDescription }
 }
 
-const slugs = ["paltosu", "dostoyevski", "puskin", "olu-canlar", "suc-ve-ceza"]
-
-export default function KlasiklerPage() {
-  const items = slugs.map(getBook).filter((b): b is NonNullable<typeof b> => Boolean(b))
+export default async function KlasiklerPage() {
+  const data = await client.fetch<PageDoc>(pageQuery, { slug: "klasikler" })
+  const items = data.sections?.[0]?.books || []
 
   return (
     <>
-      <PageHeader
-        eyebrow="Ölümsüz Eserler"
-        title="Klasikler"
-        description="Zamana meydan okuyan, insan doğasının en derin katmanlarına inen Rus edebiyatının başyapıtları. Her biri, edebiyat tarihine yön veren birer dönüm noktası."
-      />
+      <PageHeader eyebrow={data.eyebrow || ""} title={data.title} description={data.description || ""} />
       <section className="paper-texture frame-border rounded-lg bg-parchment p-6 text-parchment-foreground md:p-10">
         <ul className={cardGridClass}>
           {items.map((book) => (
-            <BookCard key={book.slug} book={book} />
+            <BookCard key={book._id} book={book} />
           ))}
         </ul>
       </section>

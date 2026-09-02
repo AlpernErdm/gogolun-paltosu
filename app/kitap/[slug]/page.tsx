@@ -1,18 +1,23 @@
+import { PortableText } from "@portabletext/react"
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { books, getBook } from "@/lib/books"
+import { client } from "@/sanity/lib/client"
+import { urlFor } from "@/sanity/lib/image"
+import { bookBySlugQuery, bookSlugsQuery } from "@/sanity/lib/queries"
+import type { BookDetail } from "@/sanity/lib/types"
 
 type Params = { params: Promise<{ slug: string }> }
 
-export function generateStaticParams() {
-  return books.map((book) => ({ slug: book.slug }))
+export async function generateStaticParams() {
+  const slugs = await client.fetch<{ slug: string }[]>(bookSlugsQuery)
+  return slugs.map(({ slug }) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params
-  const book = getBook(slug)
+  const book = await client.fetch<BookDetail | null>(bookBySlugQuery, { slug })
   if (!book) return {}
   return {
     title: `${book.title} — ${book.author} | Gogol’un Paltosu`,
@@ -22,12 +27,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function BookPage({ params }: Params) {
   const { slug } = await params
-  const book = getBook(slug)
+  const book = await client.fetch<BookDetail | null>(bookBySlugQuery, { slug })
   if (!book) notFound()
-
-  const related = book.related
-    .map((s) => getBook(s))
-    .filter((b): b is NonNullable<typeof b> => Boolean(b))
 
   return (
     <>
@@ -39,7 +40,12 @@ export default async function BookPage({ params }: Params) {
         <div className="mt-6 flex flex-col gap-8 md:flex-row">
           <div className="mx-auto w-48 shrink-0 md:mx-0">
             <div className="relative flex aspect-[2/3] items-center justify-center overflow-hidden rounded-sm bg-secondary shadow-xl ring-1 ring-parchment-foreground/30">
-              <Image src={book.cover} alt={book.coverAlt} fill className="object-contain" />
+              <Image
+                src={urlFor(book.cover).width(400).height(600).fit("max").url()}
+                alt={book.cover.alt || `${book.author} - ${book.title} kitap kapağı`}
+                fill
+                className="object-contain"
+              />
             </div>
           </div>
 
@@ -61,32 +67,36 @@ export default async function BookPage({ params }: Params) {
               </blockquote>
             ) : null}
 
-            <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-parchment-foreground/85">
-              {book.paragraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
+            {book.body ? (
+              <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-parchment-foreground/85">
+                <PortableText value={book.body} />
+              </div>
+            ) : null}
           </div>
         </div>
       </article>
 
-      <section className="paper-texture frame-border rounded-lg bg-parchment p-6 text-parchment-foreground md:p-10">
-        <h2 className="font-display text-xl font-bold uppercase tracking-wide md:text-2xl">Bunları da İnceleyin</h2>
-        <div className="mt-2 h-0.5 w-16 rounded-full bg-primary" aria-hidden="true" />
-        <ul className="mt-6 grid gap-4 sm:grid-cols-3">
-          {related.map((item) => (
-            <li key={item.slug}>
-              <Link
-                href={`/kitap/${item.slug}`}
-                className="flex h-full flex-col rounded-md bg-popover/50 p-4 ring-1 ring-parchment-foreground/20 transition-transform hover:-translate-y-1"
-              >
-                <span className="font-display text-base font-semibold text-parchment-foreground">{item.title}</span>
-                <span className="text-sm italic text-parchment-foreground/70">{item.author}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {book.related?.length ? (
+        <section className="paper-texture frame-border rounded-lg bg-parchment p-6 text-parchment-foreground md:p-10">
+          <h2 className="font-display text-xl font-bold uppercase tracking-wide md:text-2xl">Bunları da İnceleyin</h2>
+          <div className="mt-2 h-0.5 w-16 rounded-full bg-primary" aria-hidden="true" />
+          <ul className="mt-6 grid gap-4 sm:grid-cols-3">
+            {book.related.map((item) => (
+              <li key={item._id}>
+                <Link
+                  href={`/kitap/${item.slug}`}
+                  className="flex h-full flex-col rounded-md bg-popover/50 p-4 ring-1 ring-parchment-foreground/20 transition-transform hover:-translate-y-1"
+                >
+                  <span className="font-display text-base font-semibold text-parchment-foreground">
+                    {item.title}
+                  </span>
+                  <span className="text-sm italic text-parchment-foreground/70">{item.author}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </>
   )
 }
