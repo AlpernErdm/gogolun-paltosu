@@ -29,7 +29,7 @@ export default async function KesfetPage() {
             >
               <div className="relative aspect-[2/3] w-24 shrink-0 overflow-hidden rounded-sm shadow-lg ring-1 ring-parchment-foreground/30">
                 <Image
-                  src={urlFor(book.cover).width(200).height(300).fit("max").url()}
+                  src={urlFor(book.cover).width(200).url()}
                   alt={book.cover.alt || `${book.author} - ${book.title} kitap kapağı`}
                   fill
                   className="object-contain"

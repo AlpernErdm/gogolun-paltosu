@@ -82,7 +82,7 @@ export default async function HomePage() {
                   <li key={item._id} className="flex flex-col items-center text-center">
                     <div className="relative aspect-[2/3] w-full overflow-hidden rounded-sm shadow-lg ring-1 ring-parchment-foreground/30">
                       <Image
-                        src={urlFor(image).width(300).height(450).fit("max").url()}
+                        src={urlFor(image).width(300).url()}
                         alt={image.alt || `${item.author} - ${item.title} kitap kapağı`}
                         fill
                         className="object-contain"

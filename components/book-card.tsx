@@ -18,7 +18,7 @@ export function BookCard({ book }: { book: BookSummary }) {
     >
       <div className="relative flex aspect-[3/2] items-center justify-center overflow-hidden bg-secondary">
         <Image
-          src={urlFor(book.cover).width(600).height(400).fit("max").url()}
+          src={urlFor(book.cover).width(600).url()}
           alt={book.cover.alt || `${book.author} - ${book.title} kitap kapağı`}
           fill
           className="object-contain"

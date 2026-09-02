@@ -41,7 +41,7 @@ export default async function BookPage({ params }: Params) {
           <div className="mx-auto w-48 shrink-0 md:mx-0">
             <div className="relative flex aspect-[2/3] items-center justify-center overflow-hidden rounded-sm bg-secondary shadow-xl ring-1 ring-parchment-foreground/30">
               <Image
-                src={urlFor(book.cover).width(400).height(600).fit("max").url()}
+                src={urlFor(book.cover).width(400).url()}
                 alt={book.cover.alt || `${book.author} - ${book.title} kitap kapağı`}
                 fill
                 className="object-contain"
