@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+/* Tema degiskenleri: yayindaki derlenmis CSS'ten birebir alindi. */
+:root {
+  --background: #1b120b;
+  --foreground: #eadcc9;
+
+  --card: #988269;
+  --card-foreground: #25170d;
+
+  --popover: #281c13;
+  --popover-foreground: #eadcc9;
+
+  --primary: #c8331a;
+  --primary-foreground: #f9f1e3;
+
+  --secondary: #392a1e;
+  --secondary-foreground: #eadcc9;
+
+  --muted: #362c24;
+  --muted-foreground: #a59585;
+
+  --accent: #bf965d;
+  --accent-foreground: #25170d;
+
+  --destructive: #c8331a;
+
+  --border: #675136;
+  --input: #534537;
+  --ring: #bf965d;
+
+  /* Sayfa govdelerindeki acik "kagit" yuzey */
+  --parchment: #a68e71;
+  --parchment-foreground: #2a1b11;
+  --gold: #d7b16a;
+
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-parchment: var(--parchment);
+  --color-parchment-foreground: var(--parchment-foreground);
+  --color-gold: var(--gold);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Govde metni Garamond, basliklar Playfair */
+  --font-sans: var(--font-garamond), Georgia, serif;
+  --font-serif: var(--font-garamond), Georgia, serif;
+  --font-display: var(--font-playfair), Georgia, serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-garamond), Georgia, serif;
+  }
+}
+
+/* Kagit dokusu: govde bloklarinin uzerindeki dort katmanli leke efekti. */
+.paper-texture {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgb(177 155 124 / 0.35) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgb(102 80 63 / 0.35) 0%, transparent 45%),
+    radial-gradient(circle at 60% 80%, rgb(89 66 51 / 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 10% 90%, rgb(182 161 130 / 0.3) 0%, transparent 40%);
+}
+
+/* Cerceve: ic ice uc katmanli altin/koyu kenarlik. */
+.frame-border {
+  box-shadow:
+    inset 0 0 0 2px #886c4a,
+    inset 0 0 0 6px #2a1b11,
+    inset 0 0 0 8px #886c4a;
+}
